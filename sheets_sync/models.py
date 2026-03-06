@@ -2,9 +2,14 @@ from django.db import models
 
 class BajaRetencion(models.Model):
 
-    TIPO_CHOICES = [
+    ESBAJA_CHOICES = [
         ('BAJA', 'Baja'),
         ('RETENCION', 'Retención'),
+    ]
+
+    TIPO_CHOICES = [
+        ('RESIDENCIAL', 'Residencial'),
+        ('COMERCIAL', 'Comercial'),
     ]
 
     MOTIVO_CHOICES = [
@@ -27,7 +32,7 @@ class BajaRetencion(models.Model):
     fecha           = models.DateField(null=True, blank=True)
     cat             = models.CharField(max_length=100, blank=True)
     telefono        = models.CharField(max_length=20, blank=True, db_index=True)
-    retencion_baja  = models.CharField(max_length=20, blank=True)
+    retencion_baja  = models.CharField(max_length=20, choices=ESBAJA_CHOICES, blank=True)
     tipo            = models.CharField(max_length=20, choices=TIPO_CHOICES, blank=True)
     motivo          = models.CharField(max_length=50, choices=MOTIVO_CHOICES, blank=True)
     apoyo_utilizado = models.CharField(max_length=255, blank=True)
