@@ -1,0 +1,78 @@
+# ========================
+# Python / Django
+# ========================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+
+# Media y archivos estáticos
+media/
+staticfiles/
+
+# Entornos virtuales
+venv/
+env/
+ENV/
+
+# Credenciales de google api
+credentials.json
+
+# Configuración de entorno
+.env
+.env.*
+
+# Migrations (opcional: normalmente se versionan solo los __init__.py)
+*/migrations/*.pyc
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Pytest
+.pytest_cache/
+
+# ========================
+# IDEs y OS
+# ========================
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ========================
+# Distribution / packaging
+# ========================
+
+*.egg
+*.egg-info/
+dist/
+build/
+*.wheel
