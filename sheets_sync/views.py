@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.management import call_command
@@ -11,146 +12,145 @@ from .serializers import (
     BajaRetencionSerializer,
     BajaRetencionListSerializer,
     LogCorreccionSerializer,
+    StatsSerializer,
 )
 
 
 # ── Listado de registros ─────────────────────────────────────────────────────
 
-@api_view(['GET'])
-def registros_list(request):
-    qs = BajaRetencion.objects.prefetch_related('correcciones').all()
+class BajaRetencionListView(ListAPIView):
+    serializer_class = BajaRetencionListSerializer
 
-    # Filtros opcionales
-    tipo    = request.query_params.get('tipo')
-    motivo  = request.query_params.get('motivo')
-    colonia = request.query_params.get('colonia')
-    fecha   = request.query_params.get('fecha')
-    search  = request.query_params.get('search')
+    def get_queryset(self):
+        qs = BajaRetencion.objects.prefetch_related('correcciones').all()
 
-    if tipo:
-        qs = qs.filter(tipo__iexact=tipo)
-    if motivo:
-        qs = qs.filter(motivo__icontains=motivo)
-    if colonia:
-        qs = qs.filter(colonia__icontains=colonia)
-    if fecha:
-        qs = qs.filter(fecha=fecha)
-    if search:
-        qs = qs.filter(
-            Q(telefono__icontains=search) |
-            Q(cat__icontains=search)      |
-            Q(colonia__icontains=search)  |
-            Q(motivo__icontains=search)
-        )
+        # Filtros opcionales por query params
+        tipo    = self.request.query_params.get('tipo')
+        motivo  = self.request.query_params.get('motivo')
+        colonia = self.request.query_params.get('colonia')
+        fecha   = self.request.query_params.get('fecha')
+        search  = self.request.query_params.get('search')
 
-    serializer = BajaRetencionListSerializer(qs, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+        if tipo:
+            qs = qs.filter(tipo__iexact=tipo)
+        if motivo:
+            qs = qs.filter(motivo__icontains=motivo)
+        if colonia:
+            qs = qs.filter(colonia__icontains=colonia)
+        if fecha:
+            qs = qs.filter(fecha=fecha)
+        if search:
+            qs = qs.filter(
+                Q(telefono__icontains=search) |
+                Q(cat__icontains=search)      |
+                Q(colonia__icontains=search)  |
+                Q(motivo__icontains=search)
+            )
+
+        return qs
 
 
 # ── Detalle de un registro ───────────────────────────────────────────────────
 
-@api_view(['GET'])
-def registros_detail(request, pk):
-    try:
-        registro = BajaRetencion.objects.prefetch_related('correcciones').get(pk=pk)
-    except BajaRetencion.DoesNotExist:
-        return Response(
-            {'error': 'Registro no encontrado'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-    serializer = BajaRetencionSerializer(registro)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+class BajaRetencionDetailView(RetrieveAPIView):
+    queryset         = BajaRetencion.objects.prefetch_related('correcciones').all()
+    serializer_class = BajaRetencionSerializer
 
 
 # ── Estadísticas para el dashboard ──────────────────────────────────────────
 
-@api_view(['GET'])
-def stats(request):
-    total              = BajaRetencion.objects.count()
-    bajas              = BajaRetencion.objects.filter(tipo='BAJA').count()
-    retenciones        = BajaRetencion.objects.filter(tipo='RETENCION').count()
-    sin_colonia        = BajaRetencion.objects.filter(colonia='Sin Colonia').count()
-    correcciones_total = LogCorreccion.objects.count()
+class StatsView(APIView):
 
-    # Top 5 motivos
-    top_motivos = (
-        BajaRetencion.objects
-        .values('motivo')
-        .annotate(total=Count('motivo'))
-        .order_by('-total')[:5]
-    )
+    def get(self, request):
+        total       = BajaRetencion.objects.count()
+        bajas       = BajaRetencion.objects.filter(tipo='BAJA').count()
+        retenciones = BajaRetencion.objects.filter(tipo='RETENCION').count()
+        sin_colonia = BajaRetencion.objects.filter(colonia='Sin Colonia').count()
+        correcciones_total = LogCorreccion.objects.count()
 
-    # Top 5 colonias
-    top_colonias = (
-        BajaRetencion.objects
-        .exclude(colonia='Sin Colonia')
-        .values('colonia')
-        .annotate(total=Count('colonia'))
-        .order_by('-total')[:5]
-    )
+        # Top 5 motivos
+        top_motivos = (
+            BajaRetencion.objects
+            .values('motivo')
+            .annotate(total=Count('motivo'))
+            .order_by('-total')[:5]
+        )
 
-    # Registros por mes
-    por_mes = (
-        BajaRetencion.objects
-        .annotate(mes=TruncMonth('fecha'))
-        .values('mes')
-        .annotate(total=Count('id'))
-        .order_by('mes')
-        .filter(mes__isnull=False)
-    )
+        # Top 5 colonias
+        top_colonias = (
+            BajaRetencion.objects
+            .exclude(colonia='Sin Colonia')
+            .values('colonia')
+            .annotate(total=Count('colonia'))
+            .order_by('-total')[:5]
+        )
 
-    data = {
-        'total':              total,
-        'bajas':              bajas,
-        'retenciones':        retenciones,
-        'sin_colonia':        sin_colonia,
-        'correcciones_total': correcciones_total,
-        'top_motivos':        list(top_motivos),
-        'top_colonias':       list(top_colonias),
-        'por_mes': [
-            {
-                'mes':   r['mes'].strftime('%b %Y') if r['mes'] else '',
-                'total': r['total']
-            }
-            for r in por_mes
-        ],
-    }
+        # Registros por mes (últimos 6 meses)
+        from django.db.models.functions import TruncMonth
+        por_mes = (
+            BajaRetencion.objects
+            .annotate(mes=TruncMonth('fecha'))
+            .values('mes')
+            .annotate(total=Count('id'))
+            .order_by('mes')
+            .filter(mes__isnull=False)
+        )
 
-    return Response(data, status=status.HTTP_200_OK)
+        data = {
+            'total':             total,
+            'bajas':             bajas,
+            'retenciones':       retenciones,
+            'sin_colonia':       sin_colonia,
+            'correcciones_total': correcciones_total,
+            'top_motivos':       list(top_motivos),
+            'top_colonias':      list(top_colonias),
+            'por_mes':           [
+                {
+                    'mes':   r['mes'].strftime('%b %Y') if r['mes'] else '',
+                    'total': r['total']
+                }
+                for r in por_mes
+            ],
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 # ── Sincronización manual ────────────────────────────────────────────────────
 
-@api_view(['POST'])
-def sync(request):
-    try:
-        out = io.StringIO()
-        call_command('sync_sheets', stdout=out)
-        output = out.getvalue()
+class SyncView(APIView):
 
-        return Response({
-            'ok':      True,
-            'mensaje': 'Sincronización completada',
-            'detalle': output,
-        }, status=status.HTTP_200_OK)
+    def post(self, request):
+        try:
+            # Captura el output del management command
+            out = io.StringIO()
+            call_command('sync_sheets', stdout=out)
+            output = out.getvalue()
 
-    except Exception as e:
-        return Response({
-            'ok':    False,
-            'error': str(e),
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({
+                'ok':      True,
+                'mensaje': 'Sincronización completada',
+                'detalle': output,
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'ok':    False,
+                'error': str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ── Log de correcciones ──────────────────────────────────────────────────────
 
-@api_view(['GET'])
-def logs_list(request):
-    qs = LogCorreccion.objects.select_related('registro').all()
+class LogCorreccionListView(ListAPIView):
+    serializer_class = LogCorreccionSerializer
 
-    campo = request.query_params.get('campo')
-    if campo:
-        qs = qs.filter(campo__iexact=campo)
+    def get_queryset(self):
+        qs = LogCorreccion.objects.select_related('registro').all()
 
-    serializer = LogCorreccionSerializer(qs[:100], many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+        # Filtrar por campo corregido
+        campo = self.request.query_params.get('campo')
+        if campo:
+            qs = qs.filter(campo__iexact=campo)
+
+        return qs[:100]  # máximo 100 logs recientes

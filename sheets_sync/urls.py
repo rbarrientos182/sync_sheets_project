@@ -1,16 +1,17 @@
 from django.urls import path
-from .views import registros_list, registros_detail, stats, sync, logs_list
+from . import views
+
 urlpatterns = [
     # Listado y detalle
-    path('registros/',registros_list, name='registros-list'),
-    path('registros/<int:pk>/', registros_detail, name='registros-detail'),
+    path('registros/',         views.BajaRetencionListView.as_view(),   name='registros-list'),
+    path('registros/<int:pk>/', views.BajaRetencionDetailView.as_view(), name='registros-detail'),
 
     # Estadísticas para el dashboard
-    path('stats/', stats, name='stats'),
+    path('stats/',             views.StatsView.as_view(),               name='stats'),
 
     # Trigger manual de sincronización
-    path('sync/', sync, name='sync'),
+    path('sync/',              views.SyncView.as_view(),                name='sync'),
 
     # Log de correcciones
-    path('logs/',logs_list, name='logs-list'),
+    path('logs/',              views.LogCorreccionListView.as_view(),   name='logs-list'),
 ]
