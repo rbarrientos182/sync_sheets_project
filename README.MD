@@ -72,7 +72,7 @@ Docker construirá la imagen y levantará los servicios (aplicación Django y ba
 docker compose up --build
 ```
 
-### 5. Configurar variables de entorno
+### 3. Configurar variables de entorno
 
 Crea un archivo `.env` en la raíz del proyecto:
 
@@ -95,7 +95,7 @@ DB_NAME=db.sqlite3
 # DB_PORT=5432
 ```
 
-### 5. Configurar Google Cloud
+### 4. Configurar Google Cloud
 
 1. Ve a [console.cloud.google.com](https://console.cloud.google.com)
 2. Habilita **Google Sheets API** y **Google Drive API**
@@ -103,17 +103,17 @@ DB_NAME=db.sqlite3
 4. Descarga el `credentials.json` y colócalo en la raíz del proyecto
 5. Copia el `client_email` del JSON y comparte tu Google Sheet con ese correo como **Lector**
 
-### 6. Migrar base de datos
+### 5. Migrar base de datos
 
 ```bash
-docker compose exec  web python manage.py makemigrations sheets_sync
-docker compose exec  web docker python manage.py migrate
+docker compose exec web python manage.py makemigrations sheets_sync
+docker compose exec web python manage.py migrate
 ```
 
-### 7. Probar la conexión con Google Sheets
+### 6. Probar la conexión con Google Sheets
 
 ```bash
-docker compose exec  web docker python manage.py shell
+docker compose exec web python manage.py shell
 ```
 
 ```python
@@ -131,13 +131,13 @@ print("Primera fila:", rows[0])
 ### Prueba sin guardar (dry-run)
 
 ```bash
-docker compose exec  web python manage.py sync_sheets --dry-run
+docker compose exec web python manage.py sync_sheets --dry-run
 ```
 
 ### Sincronización real
 
 ```bash
-docker compose exec  web python manage.py sync_sheets
+docker compose exec web python manage.py sync_sheets
 ```
 
 Salida esperada:
