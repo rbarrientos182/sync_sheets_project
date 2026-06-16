@@ -64,7 +64,7 @@ git clone https://github.com/tu-usuario/sync-sheets-project.git
 cd sync-sheets-project
 ```
 
-### 2. Levantar el proyecto:
+### 2. Levantar el proyecto con Docker:
 
 Docker construirá la imagen y levantará los servicios (aplicación Django y base de datos PostgreSQL) automáticamente:
 
@@ -82,11 +82,11 @@ SPREADSHEET_ID=tu_spreadsheet_id_aqui
 SHEET_RANGE=Bajas_retenciones!A1:I1000
 GOOGLE_CREDENTIALS_PATH=credentials.json
 
-# Base de datos — SQLite (desarrollo)
+# Base de datos — SQLite (desarrollo opcional)
 DB_ENGINE=django.db.backends.sqlite3
 DB_NAME=db.sqlite3
 
-# Base de datos — PostgreSQL (producción)
+# Base de datos — PostgreSQL (activado si detecta configuracion con DOCKER y no por default usa SQLite)
 # DB_ENGINE=django.db.backends.postgresql
 # DB_NAME=nombre_base
 # DB_USER=postgres
