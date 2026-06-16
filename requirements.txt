@@ -8,8 +8,8 @@ google-auth-httplib2==0.3.0
 googleapis-common-protos==1.72.0
 
 # Base de datos
-#psycopg2-binary==2.9.10       # PostgreSQL (producción)
+psycopg2-binary==2.9.10       # PostgreSQL (producción)
 
-# Celery (lo agregaremos cuando lo configuremos)
-# celery==5.4.0
-# redis==5.2.1
+#Celery (lo agregaremos cuando lo configuremos)
+celery==5.4.0
+redis==5.2.1

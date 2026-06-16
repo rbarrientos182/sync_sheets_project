@@ -17,6 +17,9 @@ import os
 
 load_dotenv()
 
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -80,12 +83,29 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Detectar si estamos corriendo dentro de un contenedor Docker
+IS_DOCKER = os.getenv('IS_DOCKER', 'False') == 'True'
+
+if IS_DOCKER:
+    # Configuración para cuando corres con Docker Compose
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'syncsheets_db',
+            'USER': 'user',
+            'PASSWORD': 'password',
+            'HOST': 'db',  # Este 'db' debe coincidir con el nombre del servicio en tu docker-compose.yml
+            'PORT': '5432',
+        }
     }
-}
+else:
+    # Configuración local (cuando ejecutas manage.py localmente sin Docker)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
