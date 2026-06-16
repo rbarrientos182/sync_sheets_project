@@ -23,7 +23,6 @@ sync_sheets_project/
 ├── manage.py
 ├── .env                          # Variables de entorno (no subir a git)
 ├── .gitignore
-├── credentials.json              # Service Account de Google Cloud (no subir a git)
 ├── requirements.txt
 │
 ├── core/                         # Configuración principal de Django
@@ -33,6 +32,7 @@ sync_sheets_project/
 │   └── asgi.py
 │
 └── sheets_sync/                  # App principal
+    ├── credentials.json          # Service Account de Google Cloud (no subir a git)
     ├── models.py                 # BajaRetencion + LogCorreccion
     ├── serializers.py            # Serializers DRF
     ├── views.py                  # Endpoints con @api_view
@@ -64,25 +64,15 @@ git clone https://github.com/tu-usuario/sync-sheets-project.git
 cd sync-sheets-project
 ```
 
-### 2. Crear y activar entorno virtual
+### 2. Levantar el proyecto:
+
+Docker construirá la imagen y levantará los servicios (aplicación Django y base de datos PostgreSQL) automáticamente:
 
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Mac / Linux
-python -m venv venv
-source venv/bin/activate
+docker compose up --build
 ```
 
-### 3. Instalar dependencias
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configurar variables de entorno
+### 5. Configurar variables de entorno
 
 Crea un archivo `.env` en la raíz del proyecto:
 
@@ -116,14 +106,14 @@ DB_NAME=db.sqlite3
 ### 6. Migrar base de datos
 
 ```bash
-python manage.py makemigrations sheets_sync
-python manage.py migrate
+docker compose exec  web python manage.py makemigrations sheets_sync
+docker compose exec  web docker python manage.py migrate
 ```
 
 ### 7. Probar la conexión con Google Sheets
 
 ```bash
-python manage.py shell
+docker compose exec  web docker python manage.py shell
 ```
 
 ```python
@@ -141,13 +131,13 @@ print("Primera fila:", rows[0])
 ### Prueba sin guardar (dry-run)
 
 ```bash
-python manage.py sync_sheets --dry-run
+docker compose exec  web python manage.py sync_sheets --dry-run
 ```
 
 ### Sincronización real
 
 ```bash
-python manage.py sync_sheets
+docker compose exec  web python manage.py sync_sheets
 ```
 
 Salida esperada:
@@ -176,7 +166,7 @@ Salida esperada:
 Arranca el servidor:
 
 ```bash
-python manage.py runserver
+docker compose exec  web python manage.py runserver
 ```
 
 | Método | Endpoint | Descripción |
@@ -247,13 +237,23 @@ Registra cada corrección automática aplicada sobre un registro:
 ## 📦 requirements.txt
 
 ```
-django>=4.2
-djangorestframework>=3.15
-python-dotenv>=1.0
-google-auth>=2.29
-google-api-python-client>=2.126
-psycopg2-binary>=2.9      # PostgreSQL
+Django==6.0.3
+djangorestframework==3.16.1
+python-dotenv==1.2.2
+google-api-core==2.30.0
+google-api-python-client==2.192.0
+google-auth==2.48.0
+google-auth-httplib2==0.3.0
+googleapis-common-protos==1.72.0
+
+# Base de datos
+psycopg2-binary==2.9.10       # PostgreSQL (producción)
 # mysqlclient>=2.2         # MySQL (alternativa)
+
+# Celery
+celery==5.4.0
+redis==5.2.1
+
 ```
 
 ---
