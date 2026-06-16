@@ -48,7 +48,7 @@ sync_sheets_project/
 
 ## ⚙️ Requisitos
 
-- Python 3.10+
+- Python 3.12+
 - Node.js 18+ *(para el dashboard Vue.js)*
 - SQLite *(desarrollo)* / PostgreSQL *(producción)*
 - Cuenta en [Google Cloud Console](https://console.cloud.google.com)
