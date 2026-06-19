@@ -1,116 +1,257 @@
-# 📊 SyncSheets — Google Sheets → Django + PostgreSQL/SQLite
+# 📊 SyncSheets Platform
 
-Sincronización automática de datos desde Google Sheets hacia una base de datos relacional (SQLite en desarrollo, PostgreSQL en producción), con corrección automática de datos, API REST y dashboard en Vue.js.
+Sistema de sincronización, limpieza, almacenamiento y análisis de datos construido con **Django**, **PostgreSQL**, **Vue.js** y **Docker**.
 
----
-
-## ✨ Características
-
-- Lectura automática de Google Sheets vía **Google Sheets API v4**
-- Corrección automática de datos con **fuzzy matching** (estatus, motivos, colonias, teléfonos)
-- Log de correcciones por registro
-- API REST con **Django REST Framework**
-- Dashboard de visualización en **Vue.js + Chart.js**
-- Sincronización periódica con **Celery + Redis** *(próximamente)*
+SyncSheets automatiza la ingesta de información desde Google Sheets, aplica corrección inteligente de datos, almacena la información en una base de datos relacional y la expone mediante una API REST para análisis, dashboards y futuros modelos de Machine Learning.
 
 ---
 
-## 🗂 Estructura del proyecto
+## 🚀 Objetivo del Proyecto
 
+Muchas organizaciones gestionan información operativa mediante hojas de cálculo compartidas. Sin embargo, los datos suelen presentar problemas de calidad como:
+
+* Errores ortográficos
+* Inconsistencias de formato
+* Campos vacíos
+* Duplicados
+* Diferentes convenciones de captura
+
+SyncSheets busca resolver este problema mediante un pipeline automatizado que:
+
+1. Obtiene datos desde Google Sheets.
+2. Limpia y normaliza la información.
+3. Registra correcciones realizadas.
+4. Almacena los datos en PostgreSQL.
+5. Expone la información mediante una API REST.
+6. Permite la construcción de dashboards analíticos.
+7. Sirve como base para modelos de Machine Learning.
+
+---
+
+# 🏗 Arquitectura
+
+```text
+Google Sheets
+       │
+       ▼
+Google Sheets API
+       │
+       ▼
+SyncSheets (Django)
+       │
+       ▼
+Data Cleaning & Validation
+(Fuzzy Matching)
+       │
+       ▼
+PostgreSQL
+       │
+       ├────────► API REST (DRF)
+       │
+       ├────────► Dashboard Vue.js
+       │
+       ▼
+Machine Learning Pipeline
+(Churn Prediction)
 ```
+
+---
+
+# ✨ Características
+
+### 📥 Ingesta de Datos
+
+* Lectura automática desde Google Sheets API v4
+* Sincronización bajo demanda
+* Preparado para sincronización periódica
+
+### 🧹 Calidad de Datos
+
+* Corrección automática mediante fuzzy matching
+* Normalización de teléfonos
+* Corrección de motivos
+* Corrección de tipos de baja y retención
+* Normalización de colonias
+* Conversión de formatos de fecha
+
+### 📝 Auditoría
+
+* Registro detallado de correcciones
+* Historial por campo modificado
+* Trazabilidad de cambios
+
+### 🌐 API REST
+
+* Endpoints para consulta de registros
+* Filtros dinámicos
+* Consulta de estadísticas
+* Consulta de logs de corrección
+
+### 📊 Visualización
+
+* Dashboard en Vue.js
+* Integración con Chart.js
+* Estadísticas en tiempo real
+
+### 🐳 Contenedorización
+
+* Docker
+* Docker Compose
+* PostgreSQL en contenedor
+
+---
+
+# 🛠 Stack Tecnológico
+
+## Backend
+
+* Python 3.12
+* Django 6
+* Django REST Framework
+
+## Frontend
+
+* Vue.js 3
+* Chart.js
+
+## Base de Datos
+
+* PostgreSQL
+* SQLite (desarrollo)
+
+## Data Science
+
+* Pandas
+* NumPy
+* Scikit-Learn
+* Jupyter Notebook
+
+## Integraciones
+
+* Google Sheets API
+* Google Drive API
+
+## DevOps
+
+* Docker
+* Docker Compose
+
+## Próximamente
+
+* Celery
+* Redis
+* MLflow
+* GitHub Actions
+
+---
+
+# 📁 Estructura del Proyecto
+
+```text
 sync_sheets_project/
 │
 ├── manage.py
-├── .env                          # Variables de entorno (no subir a git)
+├── .env
 ├── .gitignore
 ├── requirements.txt
 │
-├── core/                         # Configuración principal de Django
+├── core/
 │   ├── settings.py
 │   ├── urls.py
 │   ├── wsgi.py
 │   └── asgi.py
 │
-└── sheets_sync/                  # App principal
-    ├── credentials.json          # Service Account de Google Cloud (no subir a git)
-    ├── models.py                 # BajaRetencion + LogCorreccion
-    ├── serializers.py            # Serializers DRF
-    ├── views.py                  # Endpoints con @api_view
-    ├── services.py               # Lógica de Google Sheets + corrección de datos
-    ├── urls.py                   # Rutas de la app
+└── sheets_sync/
+    ├── credentials.json
+    ├── models.py
+    ├── serializers.py
+    ├── views.py
+    ├── services.py
+    ├── urls.py
     ├── admin.py
     └── management/
         └── commands/
-            └── sync_sheets.py    # Comando: python manage.py sync_sheets
+            └── sync_sheets.py
 ```
 
 ---
 
-## ⚙️ Requisitos
+# ⚙️ Requisitos
 
-- Python 3.12+
-- Node.js 18+ *(para el dashboard Vue.js)*
-- SQLite *(desarrollo)* / PostgreSQL *(producción)*
-- Cuenta en [Google Cloud Console](https://console.cloud.google.com)
+* Python 3.12+
+* Docker
+* Docker Compose
+* PostgreSQL
+* Node.js 18+
+* Cuenta Google Cloud Platform
 
 ---
 
-## 🚀 Instalación
+# 🚀 Instalación
 
-### 1. Clonar el repositorio
+## 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/sync-sheets-project.git
-cd sync-sheets-project
+git clone https://github.com/tu-usuario/sync-sheets-platform.git
+
+cd sync-sheets-platform
 ```
 
-### 2. Levantar el proyecto con Docker:
+---
 
-Docker construirá la imagen y levantará los servicios (aplicación Django y base de datos PostgreSQL) automáticamente:
+## 2. Configurar variables de entorno
+
+Crear archivo:
+
+```bash
+.env
+```
+
+Contenido:
+
+```env
+# Google Sheets
+
+SPREADSHEET_ID=tu_spreadsheet_id
+SHEET_RANGE=Bajas_retenciones!A1:I1000
+GOOGLE_CREDENTIALS_PATH=credentials.json
+
+# SQLite (desarrollo)
+
+DB_ENGINE=django.db.backends.sqlite3
+DB_NAME=db.sqlite3
+
+# PostgreSQL (producción)
+
+# DB_ENGINE=django.db.backends.postgresql
+# DB_NAME=postgres
+# DB_USER=postgres
+# DB_PASSWORD=password
+# DB_HOST=db
+# DB_PORT=5432
+```
+
+---
+
+## 3. Levantar el entorno
 
 ```bash
 docker compose up --build
 ```
 
-### 3. Configurar variables de entorno
+---
 
-Crea un archivo `.env` en la raíz del proyecto:
-
-```env
-# Google Sheets
-SPREADSHEET_ID=tu_spreadsheet_id_aqui
-SHEET_RANGE=Bajas_retenciones!A1:I1000
-GOOGLE_CREDENTIALS_PATH=credentials.json
-
-# Base de datos — SQLite (desarrollo opcional)
-DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=db.sqlite3
-
-# Base de datos — PostgreSQL (activado si detecta configuracion con DOCKER y no por default usa SQLite)
-# DB_ENGINE=django.db.backends.postgresql
-# DB_NAME=nombre_base
-# DB_USER=postgres
-# DB_PASSWORD=tu_password
-# DB_HOST=localhost
-# DB_PORT=5432
-```
-
-### 4. Configurar Google Cloud
-
-1. Ve a [console.cloud.google.com](https://console.cloud.google.com)
-2. Habilita **Google Sheets API** y **Google Drive API**
-3. Crea una **Service Account** con rol `Viewer`
-4. Descarga el `credentials.json` y colócalo en la raíz del proyecto
-5. Copia el `client_email` del JSON y comparte tu Google Sheet con ese correo como **Lector**
-
-### 5. Migrar base de datos
+## 4. Ejecutar migraciones
 
 ```bash
-docker compose exec web python manage.py makemigrations sheets_sync
+docker compose exec web python manage.py makemigrations
+
 docker compose exec web python manage.py migrate
 ```
 
-### 6. Probar la conexión con Google Sheets
+---
+
+## 5. Verificar conexión con Google Sheets
 
 ```bash
 docker compose exec web python manage.py shell
@@ -120,150 +261,288 @@ docker compose exec web python manage.py shell
 from sheets_sync.services import fetch_sheet_data
 
 rows = fetch_sheet_data()
+
 print(f"Filas encontradas: {len(rows)}")
-print("Primera fila:", rows[0])
+print(rows[0])
 ```
 
 ---
 
-## 🔄 Sincronización
+# ☁ Configuración de Google Cloud
 
-### Prueba sin guardar (dry-run)
+1. Crear proyecto en Google Cloud.
+2. Habilitar:
+
+* Google Sheets API
+* Google Drive API
+
+3. Crear Service Account.
+4. Descargar credentials.json.
+5. Compartir el Google Sheet con el correo de la Service Account.
+
+---
+
+# 🔄 Sincronización
+
+## Simulación
 
 ```bash
 docker compose exec web python manage.py sync_sheets --dry-run
 ```
 
-### Sincronización real
+## Sincronización real
 
 ```bash
 docker compose exec web python manage.py sync_sheets
 ```
 
-Salida esperada:
+Ejemplo:
 
-```
+```text
 📥 Conectando a Google Sheets...
-✅ 45 filas encontradas en Sheets
 
-  ⚠️  Fila 5 [telefono]: Teléfono '55 123-456-78' → '5512345678'
-  ⚠️  Fila 8 [colonia]: Colonia vacía → asignado 'Sin Colonia'
-  ⚠️  Fila 12 [motivo]: motivo 'Economía' → 'ECONOMIA'
+✅ 45 filas encontradas
 
-──────────────────────────────────────────────────
-📊 RESUMEN:
-   ✅ Creados:      43
-   🔄 Actualizados: 2
-   ⚠️  Correcciones: 8
-   ⏭️  Omitidos:     0
-   ❌ Errores:      0
+⚠️ Teléfono corregido
+⚠️ Colonia normalizada
+⚠️ Motivo corregido
+
+📊 RESUMEN
+
+✅ Creados: 43
+🔄 Actualizados: 2
+⚠️ Correcciones: 8
+❌ Errores: 0
 ```
 
 ---
 
-## 🌐 API Endpoints
+# 🌐 API REST
 
-Arranca el servidor:
+## Registros
 
-```bash
-docker compose exec  web python manage.py runserver
+```http
+GET /api/sheets/registros/
 ```
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| GET | `/api/sheets/registros/` | Lista todos los registros |
-| GET | `/api/sheets/registros/<id>/` | Detalle de un registro |
-| GET | `/api/sheets/stats/` | Estadísticas para el dashboard |
-| POST | `/api/sheets/sync/` | Dispara sincronización manual |
-| GET | `/api/sheets/logs/` | Log de correcciones automáticas |
+## Detalle
 
-### Filtros disponibles en `/registros/`
-
+```http
+GET /api/sheets/registros/{id}/
 ```
+
+## Estadísticas
+
+```http
+GET /api/sheets/stats/
+```
+
+## Sincronización Manual
+
+```http
+POST /api/sheets/sync/
+```
+
+## Logs
+
+```http
+GET /api/sheets/logs/
+```
+
+---
+
+# 🔍 Filtros Disponibles
+
+```http
 /api/sheets/registros/?tipo=BAJA
+
 /api/sheets/registros/?tipo=RETENCION
+
 /api/sheets/registros/?motivo=economia
+
 /api/sheets/registros/?search=5512345678
+
 /api/sheets/registros/?tipo=BAJA&motivo=economia
 ```
 
 ---
 
-## 🗃 Modelos
+# 🗄 Modelos
 
-### `BajaRetencion`
+## BajaRetencion
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `fecha` | DateField | Fecha del registro |
-| `cat` | CharField | Identificador CAT |
-| `telefono` | CharField | Teléfono (10 dígitos) |
-| `retencion_baja` | CharField | RETENCION / BAJA |
-| `tipo` | CharField | RETENCION / BAJA (con choices) |
-| `motivo` | CharField | Motivo del catálogo |
-| `apoyo_utilizado` | CharField | Apoyo aplicado |
-| `comentarios` | TextField | Texto libre |
-| `colonia` | CharField | Colonia o "Sin Colonia" |
-| `fila_sheets` | IntegerField | Número de fila en el Sheet |
-| `creado` | DateTimeField | Fecha de creación |
-| `actualizado` | DateTimeField | Última actualización |
+Representa registros sincronizados desde Google Sheets.
 
-### `LogCorreccion`
+Campos principales:
 
-Registra cada corrección automática aplicada sobre un registro:
-
-| Campo | Descripción |
-|-------|-------------|
-| `campo` | Nombre del campo corregido |
-| `valor_original` | Valor tal como vino del Sheet |
-| `valor_corregido` | Descripción de la corrección aplicada |
-| `fecha` | Timestamp de la corrección |
+* fecha
+* cat
+* telefono
+* tipo
+* motivo
+* apoyo_utilizado
+* comentarios
+* colonia
+* fila_sheets
+* creado
+* actualizado
 
 ---
 
-## 🛡 Corrección automática de datos
+## LogCorreccion
 
-| Campo | Regla |
-|-------|-------|
-| `fecha` | Acepta `dd/mm/yyyy`, `yyyy-mm-dd`, `dd-mm-yyyy`, etc. |
-| `telefono` | Elimina caracteres no numéricos, valida 10 dígitos |
-| `tipo` | Fuzzy matching contra catálogo `BAJA` / `RETENCION` |
-| `motivo` | Fuzzy matching contra 14 motivos del catálogo |
-| `colonia` | Si viene vacía asigna `"Sin Colonia"` |
-| `cat` | Solo limpieza de espacios, guarda en mayúsculas |
+Auditoría de correcciones automáticas.
 
----
+Campos:
 
-## 📦 requirements.txt
-
-```
-Django==6.0.3
-djangorestframework==3.16.1
-python-dotenv==1.2.2
-google-api-core==2.30.0
-google-api-python-client==2.192.0
-google-auth==2.48.0
-google-auth-httplib2==0.3.0
-googleapis-common-protos==1.72.0
-
-# Base de datos
-psycopg2-binary==2.9.10       # PostgreSQL (producción)
-# mysqlclient>=2.2         # MySQL (alternativa)
-
-# Celery
-celery==5.4.0
-redis==5.2.1
-
-```
+* campo
+* valor_original
+* valor_corregido
+* fecha
 
 ---
 
-## 🔒 Seguridad
+# 🛡 Reglas de Corrección Automática
 
-Los siguientes archivos **nunca** deben subirse al repositorio:
+| Campo    | Regla                          |
+| -------- | ------------------------------ |
+| fecha    | Conversión de formatos comunes |
+| telefono | Limpieza y validación          |
+| tipo     | Fuzzy matching                 |
+| motivo   | Fuzzy matching                 |
+| colonia  | Valor por defecto              |
+| cat      | Limpieza y normalización       |
 
-```
-# .gitignore
+---
+
+# 🤖 Machine Learning Roadmap
+
+SyncSheets está evolucionando hacia una plataforma de análisis predictivo.
+
+## Caso de Uso Inicial
+
+### Churn Prediction
+
+Predicción de abandono de clientes utilizando información histórica almacenada en PostgreSQL.
+
+### Dataset utilizado
+
+Telco Customer Churn Dataset (Kaggle) (prueba)
+
+### Pipeline desarrollado
+
+* Exploratory Data Analysis (EDA)
+* Data Cleaning
+* Feature Engineering
+* Entrenamiento de modelos
+* Evaluación y métricas
+* Generación del modelo entrenado
+
+### Próximas fases
+
+* Integración del modelo en Django
+* Endpoint de inferencia
+* Dashboard predictivo
+* Reentrenamiento automático
+* Monitoreo de desempeño
+
+---
+
+# 📈 Estado Actual
+
+## Backend
+
+✅ Integración Google Sheets
+
+✅ PostgreSQL
+
+✅ API REST
+
+✅ Corrección automática
+
+✅ Docker
+
+## Data Science
+
+✅ Dataset de churn procesado (Prueba)
+
+✅ EDA completado
+
+✅ Modelo inicial entrenado
+
+🚧 Integración del modelo
+
+## Frontend
+
+🚧 Dashboard Vue.js
+
+## Cloud
+
+🚧 Deploy OCI
+
+## MLOps
+
+🚧 Celery
+
+🚧 Redis
+
+🚧 MLflow
+
+🚧 GitHub Actions
+
+---
+
+# 🚀 Roadmap
+
+## Fase 1 — Data Ingestion
+
+✅ Google Sheets API
+
+✅ Limpieza automática
+
+✅ PostgreSQL
+
+✅ API REST
+
+## Fase 2 — Analytics
+
+🚧 Dashboard Vue.js
+
+🚧 Visualización avanzada
+
+## Fase 3 — Machine Learning
+
+🚧 Churn Prediction
+
+🚧 Endpoint de inferencia
+
+🚧 Dashboard predictivo
+
+## Fase 4 — MLOps
+
+🚧 Celery
+
+🚧 Redis
+
+🚧 MLflow
+
+🚧 Model Registry
+
+## Fase 5 — Cloud
+
+🚧 OCI Deployment
+
+🚧 CI/CD
+
+🚧 Observabilidad
+
+---
+
+# 🔒 Seguridad
+
+Nunca subir al repositorio:
+
+```gitignore
 .env
 credentials.json
 venv/
@@ -274,27 +553,19 @@ db.sqlite3
 
 ---
 
-## 🗺 Roadmap
+# 👨‍💻 Autor
 
-- [x] Conexión Google Sheets API
-- [x] Corrección automática de datos con fuzzy matching
-- [x] API REST con Django REST Framework
-- [x] Log de correcciones por registro
-- [ ] Celery + Redis para sincronización automática periódica
-- [ ] Dashboard Vue.js con Chart.js
-- [ ] Migración a PostgreSQL en producción
-- [ ] Autenticación JWT en la API
-- [ ] Deploy en servidor (Railway / Render / VPS)
+**Roberto Alfonso Barrientos Balbuena**
 
----
-
-## 👤 Autor
-
-**Roberto Alfonso Barrientos Balbuena**  
+Ingeniero en Sistemas Computacionales
+Maestro en Desarrollo de Software
+Data Science & Machine Learning Enthusiast
 Puebla, México
 
 ---
 
-## 📄 Licencia
+# 📄 Licencia
 
-MIT License — libre para usar y modificar.
+MIT License
+
+Libre para usar, modificar y distribuir.
